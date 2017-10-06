@@ -25,10 +25,16 @@ function validate_query(&$query) {
     return TRUE;
 }
 
-function get_items_ids($sort_by = 'id', $sort_dir = 'asc')
-{
+function get_items_ids($sort_by = 'id', $sort_dir = 'asc', $limit = NULL, $offset = 0) {
     $mysqli = get_client();
-    $query = $mysqli->query("SELECT id FROM items ORDER BY $sort_by $sort_dir");
+
+    $query = "SELECT id FROM items ORDER BY $sort_by $sort_dir";
+
+    if (!empty($limit)) {
+        $query .= " LIMIT $limit OFFSET $offset";
+    }
+
+    $query = $mysqli->query($query);
 
     if (!validate_query($query)) {
         return FALSE;
