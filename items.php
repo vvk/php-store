@@ -1,18 +1,5 @@
-<?php error_reporting(E_ALL) ?>
-<div style="float: left; width: auto; margin-left: 10px; margin-right: 10px">
-    <h3>Add new item</h3>
-    <form action="add.php" method="post" enctype="multipart/form-data">
-        <p>Name: <input type="text" name="name" required="required" /></p>
-        <p>Description: <br /> <textarea name="description" cols="35" rows="5"></textarea></p>
-        <p>Picture: <input type="file" name="picture" accept="image/jpeg,image/png,image/gif"/></p>
-        <p>Price: <input type="number" step="any" name="price" required="required" /></p>
-        <input type="submit" value="Add item"/>
-    </form>
-</div>
 <?php
-
-const DEFAULT_SORTING_FIELD = 'id';
-const DEFAULT_SORTING_DIRECTION = 'asc';
+error_reporting(E_ALL);
 
 function resolve_sorting(&$sort_by, &$sort_dir)
 {
@@ -50,6 +37,11 @@ function build_items_query($sort_by = 'id', $sort_dir = 'asc') {
 
     return $query;
 }
+
+include 'add-item-form.html';
+
+const DEFAULT_SORTING_FIELD = 'id';
+const DEFAULT_SORTING_DIRECTION = 'asc';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
