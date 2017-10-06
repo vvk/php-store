@@ -3,19 +3,28 @@ $name = htmlspecialchars($_POST['name']);
 $description = htmlspecialchars($_POST['description']);
 $price = doubleval($_POST['price']);
 
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 $mysqli = new mysqli(
     'localhost',
     'root',
     'root',
     'store'
 );
-$query = sprintf(
-    "INSERT INTO items(name, description, price) VALUES ('%s', '%s', '%s')",
-    $mysqli->real_escape_string($name),
-    $mysqli->real_escape_string($description),
-    $mysqli->real_escape_string($price)
-);
-$result = $mysqli->query($query);
+
+try {
+    $stmt = $mysqli->prepare('INSERT INTO items(name, description, price) VALUES (?, ?, ?)');
+    $stmt->bind_param('ssd', $name, $description, $price);
+    $stmt->execute();
+    $result = $stmt->affected_rows;
+} catch (Exception $e) {
+    error_log($e);
+    die("Could not add new item.");
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+}
 
 if ($result) {
     header('Location: items.php');
