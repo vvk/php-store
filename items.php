@@ -1,9 +1,10 @@
 <?php error_reporting(E_ALL) ?>
 <div style="float: left; width: auto; margin-left: 10px; margin-right: 10px">
     <h3>Add new item</h3>
-    <form action="add.php" method="post">
+    <form action="add.php" method="post" enctype="multipart/form-data">
         <p>Name: <input type="text" name="name" required="required" /></p>
         <p>Description: <br /> <textarea name="description" cols="35" rows="5"></textarea></p>
+        <p>Picture: <input type="file" name="picture" accept="image/jpeg,image/png,image/gif"/></p>
         <p>Price: <input type="number" step="any" name="price" required="required" /></p>
         <input type="submit" value="Add item"/>
     </form>
@@ -63,7 +64,7 @@ resolve_sorting($sort_by, $sort_dir);
 $items = $mysqli->query(build_items_query($sort_by, $sort_dir));
 
 if ($items) { ?>
-    <div style="float: left; width: auto; margin-bottom: 10px">
+    <div style="float: left; width: 50%; margin-bottom: 10px">
         <h3>Items</h3>
         <form action="#">
             <p>Sort by
@@ -82,6 +83,7 @@ if ($items) { ?>
         <table border="1px">
             <tr>
                 <th align="center">ID</th>
+                <th align="center">Picture</th>
                 <th align="center">Name</th>
                 <th align="center">Price</th>
                 <th align="center">Description</th>
@@ -92,6 +94,13 @@ if ($items) { ?>
                 ?>
                 <tr>
                     <td align="center"><?php echo $id_link ?></td>
+                    <td align="center">
+                        <?php if (!empty($row['image_url'])) {
+                            echo "<img src='http://$_SERVER[HTTP_HOST]/$row[image_url]' style='max-width: 100%; max-height: 100%; display: block;' >";
+                        } else {
+                            echo 'No picture';
+                        }?>
+                    </td>
                     <td align="center"><?php echo $row['name'] ?></td>
                     <td align="right"><?php echo $row['price'] ?></td>
                     <td align="center"><?php echo $row['description'] ?></td>

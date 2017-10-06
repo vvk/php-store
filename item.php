@@ -11,7 +11,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
     $mysqli = new mysqli('localhost', 'root', 'root', 'store');
-    $stmt = $mysqli->prepare('SELECT name, description, price FROM items WHERE id = ?');
+    $stmt = $mysqli->prepare('SELECT name, description, price, image_url FROM items WHERE id = ?');
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $item = $stmt->get_result()->fetch_assoc();
@@ -34,6 +34,7 @@ if (!$item) {
 $name = $item['name'];
 $description = $item['description'];
 $price = $item['price'];
+$image_url = $item['image_url'];
 
 if ($description && substr($description, -1) != ".") {
     $description .= '.';
@@ -41,17 +42,24 @@ if ($description && substr($description, -1) != ".") {
 
 ?>
 <div style="margin-left: 10px">
-    <h3><?php echo htmlspecialchars($name) ?></h3>
-    <p><b>ID:</b> <?php echo htmlspecialchars($id) ?></p>
-    <?php
-    if ($description) {
-        ?>
-        <p><b>Description:</b> <?php echo htmlspecialchars($description) ?></p>
+    <div style="float: left; margin-right: 10px; width: 256px;">
+        <h3><?php echo htmlspecialchars($name) ?></h3>
+        <p><b>ID:</b> <?php echo htmlspecialchars($id) ?></p>
         <?php
-    }
-    ?>
-    <p><b>Price:</b> <?php echo htmlspecialchars($price) ?></p>
-    <form action="items.php">
-        <input type="submit" value="Back to the items">
-    </form>
+        if ($description) {
+            ?>
+            <p><b>Description:</b> <?php echo htmlspecialchars($description) ?></p>
+            <?php
+        }
+        ?>
+        <p><b>Price:</b> <?php echo htmlspecialchars($price) ?></p>
+        <form action="items.php">
+            <input type="submit" value="Back to the items">
+        </form>
+    </div>
+    <?php if (!empty($image_url)) {?>
+        <div style="width: 50%; height: 50%; float: left">
+            <img src="<?php echo "http://$_SERVER[HTTP_HOST]/$image_url"?>" style="max-height: 100%; max-width: 100%">
+        </div>
+    <?php }?>
 </div>
