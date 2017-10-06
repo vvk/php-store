@@ -19,7 +19,7 @@ $mysqli = new mysqli(
 $items = $mysqli->query('SELECT * FROM items');
 
 if ($items) { ?>
-    <div style="float: left; width: auto">
+    <div style="float: left; width: auto; margin-bottom: 10px">
         <h3>Items</h3>
         <table border="1px">
             <tr>
@@ -28,9 +28,12 @@ if ($items) { ?>
                 <th align="center">Price</th>
                 <th align="center">Description</th>
             </tr>
-            <?php while ($row = $items->fetch_assoc()) { ?>
+            <?php while ($row = $items->fetch_assoc()) {
+                $id = htmlspecialchars($row['id']);
+                $id_link = "<a href=\"item.php?id=$id\">$id</a>"
+                ?>
                 <tr>
-                    <td align="center"><?php echo $row['id'] ?></td>
+                    <td align="center"><?php echo $id_link ?></td>
                     <td align="center"><?php echo $row['name'] ?></td>
                     <td align="right"><?php echo $row['price'] ?></td>
                     <td align="center"><?php echo $row['description'] ?></td>

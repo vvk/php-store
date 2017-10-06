@@ -34,10 +34,24 @@ if (!$item) {
 $name = $item['name'];
 $description = $item['description'];
 $price = $item['price'];
+
+if ($description && substr($description, -1) != ".") {
+    $description .= '.';
+}
+
 ?>
 <div style="margin-left: 10px">
-<h3><?php echo htmlspecialchars($name) ?></h3>
-<p><b>ID:</b> <?php echo htmlspecialchars($id) ?></p>
-<p><b>Description:</b> <?php echo htmlspecialchars($description) . '.' ?></p>
-<p><b>Price:</b> <?php echo htmlspecialchars($price) ?></p>
+    <h3><?php echo htmlspecialchars($name) ?></h3>
+    <p><b>ID:</b> <?php echo htmlspecialchars($id) ?></p>
+    <?php
+    if ($description) {
+        ?>
+        <p><b>Description:</b> <?php echo htmlspecialchars($description) ?></p>
+        <?php
+    }
+    ?>
+    <p><b>Price:</b> <?php echo htmlspecialchars($price) ?></p>
+    <form action="items.php">
+        <input type="submit" value="Back to the items">
+    </form>
 </div>

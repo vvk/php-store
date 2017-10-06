@@ -16,19 +16,21 @@ try {
     $stmt = $mysqli->prepare('INSERT INTO items(name, description, price) VALUES (?, ?, ?)');
     $stmt->bind_param('ssd', $name, $description, $price);
     $stmt->execute();
+
     $result = $stmt->affected_rows;
+    $id = $stmt->insert_id;
 } catch (Exception $e) {
     error_log($e);
     die("Could not add new item.");
 } finally {
-    if (isset($stmt)) {
+    if ($stmt) {
         $stmt->close();
     }
 }
 
-if ($result) {
-    header('Location: items.php');
-    exit();
-} else {
-    die("Failed to update the database: " . $mysqli->error);
+if (!$result || !$id) {
+    error_log($mysqli->error);
+    die('Could not create new item.');
 }
+
+header("Location: item.php?id=$id");
