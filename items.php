@@ -9,6 +9,49 @@
     </form>
 </div>
 <?php
+
+const DEFAULT_SORTING_FIELD = 'id';
+const DEFAULT_SORTING_DIRECTION = 'asc';
+
+function resolve_sorting(&$sort_by, &$sort_dir)
+{
+    if (!empty($_GET['sort_by'])) {
+        $sort_by = strtolower($_GET['sort_by']);
+    }
+
+    if (!empty($_GET['sort_dir'])) {
+        $sort_dir = strtolower($_GET['sort_dir']);
+    }
+
+    if ($sort_by != 'id' && $sort_by != 'price') {
+        $sort_by = DEFAULT_SORTING_FIELD;
+    }
+
+    if ($sort_dir != 'asc' && $sort_dir != 'desc') {
+        $sort_dir = DEFAULT_SORTING_DIRECTION;
+    }
+}
+
+function build_items_query($sort_by = 'id', $sort_dir = 'asc') {
+    $query = 'SELECT * FROM items';
+
+    if ($sort_by == 'id') {
+        // Unfortunately here we have to specify ORDER BY
+        // explicitly even though ID is a primary key, because
+        // the sorting may be requested as descending.
+        // Similar story with sorting direction:
+        // index MAY be reversed (but MySQL just ignores it currently),
+        // so need to specify ASC explicitly as well.
+        $query .= ' ORDER BY id ' . strtoupper($sort_dir);
+    } else if ($sort_by == 'price') {
+        $query .= ' ORDER BY price ' . strtoupper($sort_dir);
+    }
+
+    return $query;
+}
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 $mysqli = new mysqli(
     'localhost',
     'root',
@@ -16,11 +59,26 @@ $mysqli = new mysqli(
     'store'
 );
 
-$items = $mysqli->query('SELECT * FROM items');
+resolve_sorting($sort_by, $sort_dir);
+$items = $mysqli->query(build_items_query($sort_by, $sort_dir));
 
 if ($items) { ?>
     <div style="float: left; width: auto; margin-bottom: 10px">
         <h3>Items</h3>
+        <form action="#">
+            <p>Sort by
+                <select name="sort_by">
+                    <option value="id" <?php if ($sort_by == 'id') echo selected ?>>ID</option>
+                    <option value="price" <?php if ($sort_by == 'price') echo selected ?>>Price</option>
+                </select>
+                , direction:
+                <select name="sort_dir">
+                    <option value="asc" <?php if ($sort_dir == 'asc') echo selected ?>>Ascending</option>
+                    <option value="desc" <?php if ($sort_dir == 'desc') echo selected ?>>Descending</option>
+                </select>
+                <input type="submit" value="Apply">
+            </p>
+        </form>
         <table border="1px">
             <tr>
                 <th align="center">ID</th>
