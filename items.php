@@ -68,13 +68,13 @@ if ($items) { ?>
         <form action="#">
             <p>Sort by
                 <select name="sort_by">
-                    <option value="id" <?php if ($sort_by == 'id') echo selected ?>>ID</option>
-                    <option value="price" <?php if ($sort_by == 'price') echo selected ?>>Price</option>
+                    <option value="id" <?php if ($sort_by == 'id') echo 'selected' ?>>ID</option>
+                    <option value="price" <?php if ($sort_by == 'price') echo 'selected' ?>>Price</option>
                 </select>
                 , direction:
                 <select name="sort_dir">
-                    <option value="asc" <?php if ($sort_dir == 'asc') echo selected ?>>Ascending</option>
-                    <option value="desc" <?php if ($sort_dir == 'desc') echo selected ?>>Descending</option>
+                    <option value="asc" <?php if ($sort_dir == 'asc') echo 'selected' ?>>Ascending</option>
+                    <option value="desc" <?php if ($sort_dir == 'desc') echo 'selected' ?>>Descending</option>
                 </select>
                 <input type="submit" value="Apply">
             </p>
