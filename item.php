@@ -16,9 +16,9 @@ if (!$item) {
 }
 
 $name = $item['name'];
-$description = $item['description'];
 $price = $item['price'];
-$image_url = "images/$item[image_url]";
+$description = array_key_exists('description', $item) ? $item['description'] : null;
+$image_name = array_key_exists('image_url', $item) ? $item['image_url'] : null;
 
 if ($description && substr($description, -1) != ".") {
     $description .= '.';
@@ -41,9 +41,9 @@ if ($description && substr($description, -1) != ".") {
             <input type="submit" value="Back to the items">
         </form>
     </div>
-    <?php if (!empty($image_url)) {?>
+    <?php if ($image_name) {?>
         <div style="width: 50%; height: 50%; float: left">
-            <img src="<?php echo "http://$_SERVER[HTTP_HOST]/$image_url"?>" style="max-height: 100%; max-width: 100%">
+            <img src="<?php echo "http://$_SERVER[HTTP_HOST]/images/$image_name"?>" style="max-height: 100%; max-width: 100%">
         </div>
     <?php }?>
 </div>
