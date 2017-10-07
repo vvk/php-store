@@ -3,7 +3,7 @@
 const PICTURES_DIR = '/var/www/html/images';
 
 function update_picture($id, &$mysqli) {
-    if (empty($_FILES['picture'])) {
+    if (!$_FILES['picture']['size']) {
         return;
     }
 
