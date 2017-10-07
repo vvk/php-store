@@ -197,7 +197,6 @@ if ($items) { ?>
                 </select>
                 <input type="submit" value="Apply">
             </p>
-            <?php echo "<input type='hidden' name='page' value='$page'>"?>
         </form>
         <div style="float: left">
             <?php echo "Total items: $total_items." ?>
