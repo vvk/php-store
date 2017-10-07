@@ -18,7 +18,7 @@ if (!$item) {
 $name = $item['name'];
 $description = $item['description'];
 $price = $item['price'];
-$image_url = $item['image_url'];
+$image_url = "images/$item[image_url]";
 
 if ($description && substr($description, -1) != ".") {
     $description .= '.';

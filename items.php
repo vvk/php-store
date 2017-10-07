@@ -220,7 +220,7 @@ if ($items) { ?>
                     <td align="center"><?php echo $id_link ?></td>
                     <td align="center">
                         <?php if (!empty($row['image_url'])) {
-                            echo "<img src='http://$_SERVER[HTTP_HOST]/$row[image_url]' style='max-width: 100%; max-height: 100%; display: block;' >";
+                            echo "<img src='http://$_SERVER[HTTP_HOST]/images/t_$row[image_url]' style='max-width: 100%; max-height: 100%; display: block;' >";
                         } else {
                             echo 'No picture';
                         }?>

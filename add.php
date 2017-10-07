@@ -1,76 +1,63 @@
 <?php
 
+include 'shared.php';
+
 const PICTURES_DIR = '/var/www/html/images';
 
-function update_picture($id, &$mysqli) {
+function upload_picture(&$generated_name) {
     if (!$_FILES['picture']['size']) {
-        return;
+        return true;
     }
 
     $pic = $_FILES['picture'];
-    $uploaded_picture_name = basename($pic['name']);
-    $mime_type = $pic['type'];
+    $extension = pathinfo(basename($pic['name']),PATHINFO_EXTENSION);
 
+    $generated_image_name = uniqid().".$extension";
+    $images_directory = getcwd().'/images';
 
+    if (!file_exists($images_directory)) {
+        mkdir($images_directory, 0777, true);
+    }
 
-    $extension = pathinfo($uploaded_picture_name,PATHINFO_EXTENSION);
-    $new_name = uniqid() . ".$extension";
-    $destination = getcwd() . "/${new_name}";
+    $destination = "$images_directory/$generated_image_name";
 
     if (!move_uploaded_file($pic['tmp_name'], $destination)) {
-        die("Something went wrong while the item picture was being uploaded.");
+        error_log(__FILE__.':'.__FUNCTION__.': Something went wrong while the item picture was being uploaded.');
     }
 
-    try {
-        error_log("Name: $new_name, ID: $id");
-        $stmt = $mysqli->prepare('UPDATE items SET image_url = ? WHERE id = ?');
-        $stmt->bind_param('si', $new_name, $id);
-        $stmt->execute();
-        $result = $stmt->affected_rows;
-
-        if (!$result) {
-            die("Could not upload image.");
-        }
-    } catch (Exception $e) {
-        error_log($e);
-        die("Could not upload image.");
+    $imagick = new Imagick($destination);
+    $imagick->thumbnailImage(64, 64, true);
+    if (!$imagick->writeImage("$images_directory/t_$generated_image_name")) {
+        error_log(__FILE__.':'.__FUNCTION__.': Could not save image.');
+        return false;
     }
+
+    $generated_name = $generated_image_name;
+
+    return true;
 }
 
-$name = htmlspecialchars($_POST['name']);
-$description = htmlspecialchars($_POST['description']);
+$name = $_POST['name'];
+$description = $_POST['description'];
 $price = doubleval($_POST['price']);
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-$mysqli = new mysqli(
-    'localhost',
-    'root',
-    'root',
-    'store'
-);
-
-try {
-    $stmt = $mysqli->prepare('INSERT INTO items(name, description, price) VALUES (?, ?, ?)');
-    $stmt->bind_param('ssd', $name, $description, $price);
-    $stmt->execute();
-
-    $result = $stmt->affected_rows;
-    $id = $stmt->insert_id;
-} catch (Exception $e) {
-    error_log($e);
-    die("Could not add new item.");
-} finally {
-    if ($stmt) {
-        $stmt->close();
-    }
+if (empty($name)) {
+    die("Item name can not be empty.");
 }
 
-if (!$result || !$id) {
-    error_log($mysqli->error);
-    die('Could not create new item.');
+if ($price < 0) {
+    die("Price can not be negative.");
+    // But can be zero, we're generous.
 }
 
-update_picture($id, $mysqli);
+if (!upload_picture($generated_image_name)) {
+    error_log('Could not load image for the item.');
+}
+
+$id = create_item($name, $price, $description, $generated_image_name);
+
+if (!$id) {
+    die("Could not create item.");
+}
 
 header("Location: item.php?id=$id");
