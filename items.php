@@ -65,6 +65,83 @@ function build_items_query($sort_by = 'id', $sort_dir = 'asc') {
 
     return $query;
 }
+
+function pagination($page, $total_pages) {
+    global $sort_by;
+    global $sort_dir;
+    global $items_per_page;
+
+    $params = array(
+            'sort_by' => $sort_by,
+            'sort_dir' => $sort_dir,
+            'ipp' => $items_per_page
+    );
+    $url_params = http_build_query($params);
+
+    $pagination_markup = 'Pages:';
+
+    // First page
+    if ($page == 0) {
+        $pagination_markup .= ' 1';
+    } else {
+        $pagination_markup .= " <a href='items.php?${url_params}&page=0'>1</a> ";
+    }
+
+    // Not shown pages
+    if ($page > 2) {
+        $pagination_markup .= ' ...';
+    }
+
+    // Previous from current
+    if ($page > 1) {
+        $pagination_markup .= " <a href='items.php?${url_params}&page=".($page - 1)."'>$page</a>";
+    }
+
+    // Current pages with no link
+    if ($page != 0) { // We have already drown it.
+        $pagination_markup .= " ".($page + 1);
+    }
+
+    // Next from current
+    if ($page != $total_pages) {
+        $next_page = $page + 1;
+        $next_page_markup = $next_page + 1;
+        $pagination_markup .= " <a href='items.php?${url_params}&page=$next_page'>$next_page_markup</a>";
+    }
+
+    // Not shown pages
+    if ($total_pages - $page > 2) {
+        $pagination_markup .= ' ...';
+    }
+
+    // Last page
+    if ($page < $total_pages - 1) {
+        $last_page_markup = $total_pages + 1;
+        $pagination_markup .= " <a href='items.php?${url_params}&page=$total_pages'>$last_page_markup</a>";
+    }
+
+    // Buttons
+    if ($total_pages != 0) {
+        $pagination_markup .= "<form action='items.php' style='display: inline;'>";
+        if ($page != 0) {
+            $prev_page = $page - 1;
+            $pagination_markup .= "  <button type='submit' name='page' value='$prev_page'>&lt; Previous</button>";
+        }
+
+        if ($page != $total_pages) {
+            $next_page = $page + 1;
+            $pagination_markup .= "  <button type='submit' name='page' value='$next_page'>Next &gt;</button>";
+        }
+
+        foreach ($params as $key => $value) {
+            $pagination_markup .= "<input type='hidden' name='$key' value='$value'>";
+        }
+
+        $pagination_markup .= "</form>";
+    }
+
+    echo $pagination_markup;
+}
 ?>
 <?php include 'add-item-form.html'; ?>
 <?php
@@ -92,11 +169,7 @@ $items = get_items_by_id($items_to_get);
 
 if ($items) { ?>
     <div style="float: left; width: 50%; margin-bottom: 10px">
-    <?php
-    $user_page = $page + 1;
-    $user_total_pages = $total_pages + 1;
-    echo "<h3>Found $total_items item(s). Showing page $user_page of $user_total_pages.</h3>"
-    ?>
+        <h3>Items list.</h3>
         <form action="items.php">
             <p>Sort by
                 <select name="sort_by">
@@ -126,7 +199,13 @@ if ($items) { ?>
             </p>
             <?php echo "<input type='hidden' name='page' value='$page'>"?>
         </form>
-        <table border="1px">
+        <div style="float: left">
+            <?php echo "Total items: $total_items." ?>
+        </div>
+        <div style='float: right'>
+            <?php pagination($page, $total_pages) ?>
+        </div>
+        <table border="1px" style="width: 100%;">
             <tr>
                 <th align="center">ID</th>
                 <th align="center">Picture</th>
@@ -153,5 +232,11 @@ if ($items) { ?>
                 </tr>
             <?php } ?>
         </table>
+        <div style="float: left">
+            <?php echo "Total items: $total_items." ?>
+        </div>
+        <div style='float: right'>
+            <?php pagination($page, $total_pages) ?>
+        </div>
     </div>
 <?php } ?>
