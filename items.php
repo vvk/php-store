@@ -165,7 +165,7 @@ if ($to > $total_items) {
 }
 
 $items_to_get = get_items_ids($sort_by, $sort_dir, $items_per_page, $from);
-$items = get_items_by_id($items_to_get);
+$items = get_items($items_to_get);
 
 if ($items) { ?>
     <div style="float: left; width: 50%; margin-bottom: 10px">
@@ -214,7 +214,7 @@ if ($items) { ?>
             </tr>
             <?php foreach ($items as $row) {
                 $id = htmlspecialchars($row['id']);
-                $id_link = "<a href=\"item.php?id=$id\">$id</a>"
+                $id_link = "<a href='item.php?id=$id'>$id</a>"
                 ?>
                 <tr>
                     <td align="center"><?php echo $id_link ?></td>

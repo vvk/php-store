@@ -1,5 +1,7 @@
 <?php
 
+include 'cache.php';
+
 const MYSQL_HOST = 'localhost';
 const MYSQL_USER = 'root';
 const MYSQL_PASSWORD = 'root'; // Yeah, it's plain text.
@@ -14,6 +16,16 @@ function &get_client() {
     );
 
     return $mysqli;
+}
+
+function _free_resources(&$stmt, &$mysqli) {
+    if (!empty($stmt)) {
+        $stmt->close();
+    }
+
+    if (!empty($mysqli)) {
+        $mysqli->close();
+    }
 }
 
 function validate_query(&$query) {
@@ -51,7 +63,7 @@ function get_items_ids($sort_by = 'id', $sort_dir = 'asc', $limit = NULL, $offse
     return $ids;
 }
 
-function get_item($id) {
+function load_item($id) {
     $mysqli = get_client();
 
     $stmt = $mysqli->prepare('SELECT * FROM items WHERE id = ?');
@@ -66,15 +78,37 @@ function get_item($id) {
     $result = $stmt->get_result();
     _free_resources($stmt, $mysqli);
 
-    if ($result) {
-        return $result->fetch_assoc();
-    } else {
-        error_log("Could not retrieve item.");
+    if (!$result) {
+        error_log("Could not retrieve item $id.");
         return FALSE;
     }
+
+    $item = $result->fetch_assoc();
+
+    if (!$item) {
+        error_log("Item ID:$id not found.");
+        return FALSE;
+    }
+
+    return $item;
 }
 
-function get_total_items() {
+function get_item($id) {
+    $item = get_item_from_cache($id);
+    if ($item) {
+        return $item;
+    }
+
+    $item = load_item($id);
+    if (!$item) {
+        return FALSE;
+    }
+
+    put_item_to_cache($id, $item);
+    return $item;
+}
+
+function load_total_items() {
     $mysqli = get_client();
     $query = $mysqli->query('SELECT count(id) FROM items');
 
@@ -82,13 +116,26 @@ function get_total_items() {
         return FALSE;
     }
 
-    $id = $query->fetch_row()[0];
+    $total = $query->fetch_row()[0];
     _free_resources($query, $mysqli);
 
-    return $id;
+    return $total;
 }
 
-function get_items_by_id(&$ids) {
+function get_total_items() {
+    $total = get_from_cache('total_items');
+
+    if ($total) {
+        return $total;
+    }
+
+    $total = load_total_items();
+    put_to_cache('total_items', $total);
+
+    return $total;
+}
+
+function load_items($ids) {
     if (!is_array($ids)) {
         $ids = array($ids);
     }
@@ -121,12 +168,55 @@ function get_items_by_id(&$ids) {
     return $items;
 }
 
-function _free_resources(&$stmt, &$mysqli) {
-    if (!empty($stmt)) {
-        $stmt->close();
+function get_items($ids) {
+    $items = get_items_from_cache($ids);
+
+    if (!$items) {
+        $items = load_items($ids);
+
+        if (!$items) {
+            return FALSE;
+        }
+
+        put_items_to_cache($items);
+        return $items;
     }
 
-    if (!empty($mysqli)) {
-        $mysqli->close();
+    // Since get_items_from_cache used 'getMulti' only found items are returned,
+    // so we have to check all required ids for existence and load not-cached-yet ones.
+    $items_to_load = array();
+    $restore_order = FALSE;
+
+    foreach ($ids as $id) {
+        if (empty($items[$id])) {
+            $items_to_load[] = $id;
+        }
     }
+
+    if (!empty($items_to_load)) {
+        $loaded_items = load_items($items_to_load);
+
+        if (!$loaded_items) {
+            return FALSE;
+        }
+
+        $items = $items + $loaded_items;
+        $restore_order = TRUE;
+    }
+
+    // If not all items were found in cache and we had to load
+    // items from database additionally we could lose requested order of ids,
+    // so now we have to restore original order.
+    if ($restore_order) {
+        $tmp_items = array();
+
+        foreach ($ids as $id) {
+            $tmp_items[$id] = $items[$id];
+        }
+
+        $items = $tmp_items;
+    }
+
+    return $items;
 }
+
