@@ -1,4 +1,6 @@
 <?php
+include 'shared.php';
+
 $id = $_GET['id'];
 
 if (!$id) {
@@ -7,25 +9,7 @@ if (!$id) {
     exit();
 }
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-try {
-    $mysqli = new mysqli('localhost', 'root', 'root', 'store');
-    $stmt = $mysqli->prepare('SELECT name, description, price, image_url FROM items WHERE id = ?');
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $item = $stmt->get_result()->fetch_assoc();
-} catch (Exception $e) {
-    error_log($e);
-    die('Could not open the items with ID:' . htmlspecialchars($id) . '.');
-} finally {
-    if (isset($stmt)) {
-        $stmt->close();
-    }
-    if (isset($mysqli)) {
-        $mysqli->close();
-    }
-}
+$item = get_item($id);
 
 if (!$item) {
     die('Item with ID:' . htmlspecialchars($id) . ' is not found.');
