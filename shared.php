@@ -220,3 +220,38 @@ function get_items($ids) {
     return $items;
 }
 
+function create_item($name, $price, $description = null, $image = null) {
+    if (empty($name)) {
+        error_log(__FILE__.':'.__FUNCTION__.': Empty name for the item.');
+        return false;
+    }
+
+    if ($price < 0) {
+        error_log(__FILE__.':'.__FUNCTION__.': Negative price.');
+        return false;
+    }
+
+    $mysqli = get_client();
+    $stmt = $mysqli->prepare('INSERT INTO items(name, description, price, image_url) VALUES (?, ?, ?, ?)');
+
+    if (!validate_query($stmt)) {
+        return false;
+    }
+
+    $stmt->bind_param('ssds', $name, $description, $price, $image);
+    if (!$stmt->execute()) {
+        error_log($mysqli->error);
+        return false;
+    }
+
+    $id = $stmt->insert_id;
+    $item = array(
+        'id' => $id,
+        'name' => $name,
+        'price' => $price,
+        'description' => $description,
+        'image_url' => $image);
+    put_item_to_cache($id, $item);
+
+    return $id;
+}
