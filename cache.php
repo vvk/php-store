@@ -2,15 +2,21 @@
 
 $memcached = new Memcached();
 $memcached->addServer('localhost', 11211);
+$memcached->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
+
+function &get_cache() {
+    global $memcached;
+    return $memcached;
+}
 
 function get_from_cache($key) {
     global $memcached;
     return $memcached->get($key);
 }
 
-function put_to_cache($key, $value) {
+function put_to_cache($key, $value, $expire = 0) {
     global $memcached;
-    return $memcached->set($key, $value);
+    return $memcached->set($key, $value, $expire);
 }
 
 function increment_cache_value($key) {
@@ -67,3 +73,33 @@ function invalidate_cache($ids = NULL) {
     }
 }
 
+function reset_groups_cache() {
+    $total_groups = get_from_cache(':total');
+    $groups = array();
+    for ($i = 0; $i < $total_groups; ++$i) {
+        $groups[] = "g:id:asc:$i";
+        $groups[] = "g:id:desc:$i";
+        $groups[] = "g:price:asc:$i";
+        $groups[] = "g:price:desc:$i";
+    }
+
+    invalidate_cache($groups);
+}
+
+function get_page_groups_version() {
+    global $memcached;
+    $version = $memcached->get('g:v');
+    if (!$version) {
+        $version = bump_pages_groups_version();
+    }
+
+    if (!$version) {
+        error_log("FUCK: $version ".$memcached->getResultMessage().' look: '.$memcached->get('g:v'));
+    }
+    return $version;
+}
+
+function bump_pages_groups_version() {
+    global $memcached;
+    return $memcached->increment('g:v', 1, 1);
+}

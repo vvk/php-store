@@ -8,7 +8,7 @@ const DEFAULT_SORTING_DIRECTION = 'asc';
 const DEFAULT_PAGE_INDEX = 0;
 const DEFAULT_ITEMS_PER_PAGE = 25;
 
-function resolve_sorting(&$sort_by = DEFAULT_SORTING_FIELD, &$sort_dir = DEFAULT_SORTING_DIRECTION)
+function resolve_sorting(&$sort_by, &$sort_dir)
 {
     if (!empty($_GET['sort_by'])) {
         $sort_by = strtolower($_GET['sort_by']);
@@ -163,9 +163,8 @@ $to = $from + $items_per_page; // Currently not used, but may be useful later fo
 if ($to > $total_items) {
     $to = $total_items;
 }
-
-$items_to_get = get_items_ids($sort_by, $sort_dir, $items_per_page, $from);
-$items = get_items($items_to_get);
+$ids = get_items_ids_sorted($items_per_page, $from, $sort_by, $sort_dir);
+$items = get_items($ids);
 
 if ($items) { ?>
     <div style="float: left; width: 50%; margin-bottom: 10px">
