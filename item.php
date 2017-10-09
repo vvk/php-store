@@ -37,8 +37,9 @@ if ($description && substr($description, -1) != ".") {
         }
         ?>
         <p><b>Price:</b> <?php echo htmlspecialchars(number_format($price, 2)) ?></p>
-        <form action="items.php">
-            <input type="submit" value="Back to the items">
+        <form action="edit.php">
+            <input type="hidden" name="id" value="<?php echo htmlspecialchars($id) ?>" />
+            <input type="submit" value="Edit"/>
         </form>
     </div>
     <?php if ($image_name) {
