@@ -1,13 +1,8 @@
 <?php
 
+include_once 'constants.php';
+
 include 'cache.php';
-
-const MYSQL_HOST = 'localhost';
-const MYSQL_USER = 'root';
-const MYSQL_PASSWORD = 'root'; // Yeah, it's plain text.
-const DATABASE = 'store';
-
-const GROUP_SIZE = 1000;
 
 function &get_client() {
     $mysqli = new mysqli(
@@ -43,38 +38,12 @@ function validate_query(&$query, &$mysqli = null) {
     return TRUE;
 }
 
-function get_items_ids($sort_by = 'id', $sort_dir = 'asc', $limit = NULL, $offset = 0) {
-    $mysqli = get_client();
-
-    $query = "SELECT id FROM items ORDER BY $sort_by $sort_dir";
-
-    if (!empty($limit)) {
-        $query .= " LIMIT $limit OFFSET $offset";
-    }
-
-    $query = $mysqli->query($query);
-
-    if (!validate_query($query)) {
-        return FALSE;
-    }
-
-    $ids = array();
-
-    while ($row = $query->fetch_row()) {
-        $ids[] = $row[0];
-    }
-
-    _free_resources($query, $mysqli);
-
-    return $ids;
-}
-
 function load_item($id) {
     $mysqli = get_client();
 
     $stmt = $mysqli->prepare('SELECT * FROM items WHERE id = ?');
 
-    if (!validate_query($stmt)) {
+    if (!validate_query($stmt, $mysqli)) {
         return FALSE;
     }
 
@@ -118,7 +87,7 @@ function load_total_items() {
     $mysqli = get_client();
     $query = $mysqli->query('SELECT count(id) FROM items');
 
-    if (!validate_query($query)) {
+    if (!validate_query($query, $mysqli)) {
         return FALSE;
     }
 
@@ -149,7 +118,7 @@ function load_items($ids) {
     $mysqli = get_client();
     $stmt = $mysqli->prepare('SELECT * FROM items WHERE id = ?');
 
-    if (!validate_query($stmt)) {
+    if (!validate_query($stmt, $mysqli)) {
         return FALSE;
     }
 
@@ -228,19 +197,21 @@ function get_items($ids) {
 
 function create_item($name, $price, $description = null, $image = null) {
     if (empty($name)) {
-        error_log(__FILE__.':'.__FUNCTION__.': Empty name for the item.');
+        error_log('Empty name for the item.');
+        error_log(debug_backtrace());
         return false;
     }
 
     if ($price < 0) {
-        error_log(__FILE__.':'.__FUNCTION__.': Negative price.');
+        error_log('Negative price.');
+        error_log(debug_backtrace());
         return false;
     }
 
     $mysqli = get_client();
     $stmt = $mysqli->prepare('INSERT INTO items(name, description, price, image) VALUES (?, ?, ?, ?)');
 
-    if (!validate_query($stmt)) {
+    if (!validate_query($stmt, $mysqli)) {
         return false;
     }
 
@@ -280,13 +251,15 @@ function upload_image(&$generated_name_output) {
     $destination = "$images_directory/$generated_image_name";
 
     if (!move_uploaded_file($image['tmp_name'], $destination)) {
-        error_log(__FILE__.':'.__FUNCTION__.': Something went wrong while the item image was being uploaded.');
+        error_log('Something went wrong while the item image was being uploaded.');
+        error_log(debug_backtrace());
     }
 
     $imagick = new Imagick($destination);
     $imagick->thumbnailImage(64, 64, true);
     if (!$imagick->writeImage("$images_directory/t_$generated_image_name")) {
-        error_log(__FILE__.':'.__FUNCTION__.': Could not save image.');
+        error_log('Could not save image.');
+        error_log(debug_backtrace());
         return false;
     }
 
@@ -321,6 +294,7 @@ function update_item($id, $updates) {
         error_log("Could not update item ID:$id: ".$mysqli->error);
         return false;
     }
+    _free_resources($stmt, $mysqli);
 
     if (!invalidate_cache($id)) {
         error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
@@ -342,6 +316,7 @@ function delete_item($id) {
         error_log("Could not delete item ID:$id: ".$mysqli->error);
         return false;
     }
+    _free_resources($stmt, $mysqli);
 
     if (!invalidate_cache($id)) {
         error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
@@ -350,7 +325,7 @@ function delete_item($id) {
 
     return true;
 }
-function get_items_ids_sorted($limit, $offset = 0, $sort_by = 'id', $sort_dir = 'asc') {
+function get_items_ids_sorted($limit, $offset = 0, $sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
     $total = get_total_items();
 
     if ($total == 0) {

@@ -1,5 +1,7 @@
 <?php
 
+include_once 'constants.php';
+
 $memcached = new Memcached();
 $memcached->addServer('localhost', 11211);
 $memcached->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
@@ -30,19 +32,19 @@ function decrement_cache_value($key) {
 }
 
 function increment_total_items() {
-    return increment_cache_value('total_items');
+    return increment_cache_value(TOTAL_ITEMS_CACHE_KEY);
 }
 
 function decrement_total_items() {
-    return decrement_cache_value('total_items');
+    return decrement_cache_value(TOTAL_ITEMS_CACHE_KEY);
 }
 
-function get_sorted_ids($sort_by = 'id', $sort_dir = 'asc') {
+function get_sorted_ids($sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
     global $memcached;
     return $memcached->get("sorted:$sort_by:$sort_dir");
 }
 
-function set_sorted_ids($ids, $sort_by = 'id', $sort_dir = 'asc') {
+function set_sorted_ids($ids, $sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
     global $memcached;
     return $memcached->set("sorted:$sort_by:$sort_dir", $ids);
 }
@@ -86,33 +88,17 @@ function invalidate_cache($ids = NULL) {
     }
 }
 
-function reset_groups_cache() {
-    $total_groups = get_from_cache(':total');
-    $groups = array();
-    for ($i = 0; $i < $total_groups; ++$i) {
-        $groups[] = "g:id:asc:$i";
-        $groups[] = "g:id:desc:$i";
-        $groups[] = "g:price:asc:$i";
-        $groups[] = "g:price:desc:$i";
-    }
-
-    invalidate_cache($groups);
-}
-
 function get_page_groups_version() {
     global $memcached;
-    $version = $memcached->get('g:v');
+    $version = $memcached->get(GROUP_VERSION_CACHE_KEY);
     if (!$version) {
         $version = bump_pages_groups_version();
     }
 
-    if (!$version) {
-        error_log("FUCK: $version ".$memcached->getResultMessage().' look: '.$memcached->get('g:v'));
-    }
     return $version;
 }
 
 function bump_pages_groups_version() {
     global $memcached;
-    return $memcached->increment('g:v', 1, 1);
+    return $memcached->increment(GROUP_VERSION_CACHE_KEY, 1, 1);
 }

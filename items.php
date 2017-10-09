@@ -2,11 +2,7 @@
 error_reporting(E_ALL);
 
 include 'shared.php';
-
-const DEFAULT_SORTING_FIELD = 'id';
-const DEFAULT_SORTING_DIRECTION = 'asc';
-const DEFAULT_PAGE_INDEX = 0;
-const DEFAULT_ITEMS_PER_PAGE = 25;
+include_once 'constants.php';
 
 function resolve_sorting(&$sort_by, &$sort_dir)
 {
@@ -48,7 +44,7 @@ function resolve_pagination(&$page, &$items_per_page)
     }
 }
 
-function build_items_query($sort_by = 'id', $sort_dir = 'asc') {
+function build_items_query($sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
     $query = 'SELECT * FROM items';
 
     if ($sort_by == 'id') {
