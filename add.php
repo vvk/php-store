@@ -17,7 +17,7 @@ if ($price <= 0) {
     // But can be zero, we're generous.
 }
 
-if (!upload_picture($generated_image_name)) {
+if (!upload_image($generated_image_name)) {
     error_log('Could not load image for the item.');
 }
 
@@ -27,5 +27,6 @@ if (!$id) {
     die("Could not create item.");
 }
 
+increment_total_items();
 bump_pages_groups_version();
 header("Location: item.php?id=$id");

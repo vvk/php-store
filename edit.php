@@ -49,17 +49,18 @@ if (!$item) {
     $safe_description = htmlspecialchars($item['description']);
     $safe_price = htmlspecialchars($item['price']);
     echo "<h3>Edit: <a href='item.php?id=$safe_id'>$safe_name</a></h3>"?>
-    <form id="edit-item">
+    <form action="update.php" method="post" enctype="multipart/form-data">
         <table border="1px">
             <tr><th>Parameter</th><th>Value</th></tr>
             <tr><td class="name">Name</td><td class="value"><input type="text" name="name" required = "true"value="<?php echo $safe_name ?>"></td></tr>
             <tr><td class="name">Description</td><td class="value"><input width="400" type="text" name="description" value="<?php echo $safe_description ?>"></td></tr>
             <tr><td class="name">Price</td><td class="value"><input type="number" name="price" step="any" max="9999999999.99" required = "true" value="<?php echo $safe_price ?>"></td></tr>
-            <tr><td class="name">Image</td><td class="value"><input type="file" name="image"></td></tr>
+            <tr><td class="name">Image</td><td class="value"><input type="file" name="image" accept="image/jpeg,image/png,image/gif"/></td></tr>
         </table>
         <input type="hidden" name="id" value="<?php echo $safe_id ?>" />
+        <input type="hidden" name="action" value="update" />
+        <input type="submit" value="Update">
     </form>
-    <button form="edit-item" formaction="update.php" formmethod="post">Update</button>
     <form action="item.php" style="display: inline">
         <input type="hidden" name="id" value="<?php echo $safe_id ?>" />
         <input type="submit" value="Cancel"/>

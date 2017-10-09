@@ -36,7 +36,7 @@ function validate_query(&$query, &$mysqli = null) {
         if (!empty($mysqli)) {
             $msg .= $mysqli->error;
         }
-        error_log($msg);
+        error_log($msg.'. '.debug_backtrace());
         return FALSE;
     }
 
@@ -262,13 +262,13 @@ function create_item($name, $price, $description = null, $image = null) {
     return $id;
 }
 
-function upload_picture(&$generated_name) {
-    if (!$_FILES['picture']['size']) {
+function upload_image(&$generated_name_output) {
+    if (empty($_FILES['image']) || !$_FILES['image']['size']) {
         return true;
     }
 
-    $pic = $_FILES['picture'];
-    $extension = pathinfo(basename($pic['name']),PATHINFO_EXTENSION);
+    $image = $_FILES['image'];
+    $extension = pathinfo(basename($image['name']),PATHINFO_EXTENSION);
 
     $generated_image_name = uniqid().".$extension";
     $images_directory = getcwd().'/images';
@@ -279,8 +279,8 @@ function upload_picture(&$generated_name) {
 
     $destination = "$images_directory/$generated_image_name";
 
-    if (!move_uploaded_file($pic['tmp_name'], $destination)) {
-        error_log(__FILE__.':'.__FUNCTION__.': Something went wrong while the item picture was being uploaded.');
+    if (!move_uploaded_file($image['tmp_name'], $destination)) {
+        error_log(__FILE__.':'.__FUNCTION__.': Something went wrong while the item image was being uploaded.');
     }
 
     $imagick = new Imagick($destination);
@@ -290,7 +290,7 @@ function upload_picture(&$generated_name) {
         return false;
     }
 
-    $generated_name = $generated_image_name;
+    $generated_name_output = $generated_image_name;
 
     return true;
 }
@@ -307,13 +307,23 @@ function update_item($id, $updates) {
         return false;
     }
 
+    $types = "";
+    $values = array();
     foreach ($updates as $key => $value) {
-        $type = $key == 'price' ? 'd' : 's';
-        $stmt->bind_param($type, $value);
+        $types .= ($key == 'price' ? 'd' : 's');
+        $values[] = $value;
     }
+    $types .= 'i';
+    $values[] = $id;
+    $stmt->bind_param($types, ...$values);
 
     if (!$stmt->execute()) {
         error_log("Could not update item ID:$id: ".$mysqli->error);
+        return false;
+    }
+
+    if (!invalidate_cache($id)) {
+        error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
         return false;
     }
 
@@ -405,7 +415,6 @@ function get_group($group_key) {
     $group = get_from_cache($group_key);
 
     if ($group) {
-        error_log("Cache hit! $group_key");
         return $group;
     }
 

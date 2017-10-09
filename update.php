@@ -26,7 +26,7 @@ function update($id) {
         $updated_parameters['description'] = $description;
     }
 
-    if (upload_picture($image) && !empty($image)) {
+    if (upload_image($image) && !empty($image)) {
         $updated_parameters['image'] = $image;
     }
 
@@ -34,6 +34,8 @@ function update($id) {
         error_log("Could not update item ID:$id.");
         return false;
     }
+
+    bump_pages_groups_version();
 
     return true;
 }
@@ -44,6 +46,7 @@ function delete($id) {
         return false;
     }
 
+    decrement_total_items();
     bump_pages_groups_version();
 
     return true;
@@ -54,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     die();
 }
 
-$id = $_GET['id'];
-$action = $_GET['action'];
+$id = $_POST['id'];
+$action = $_POST['action'];
 
 if (empty($action) || empty($id)) {
     header("$_SERVER[SERVER_PROTOCOL] 400");
@@ -65,7 +68,14 @@ if (empty($action) || empty($id)) {
 $action = strtolower($action);
 
 if ($action == 'update') {
-    update($id);
+    if (update($id)) {
+
+        header('Location: item.php?id='.htmlspecialchars($id));
+    } else {
+        die("Failed to update item ID:$id.");
+    }
+
 } else if ($action == 'delete') {
     delete($id);
+    header('Location: items.php');
 }
