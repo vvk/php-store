@@ -24,11 +24,15 @@ if ($description && substr($description, -1) != ".") {
     $description .= '.';
 }
 
+$safe_id = htmlspecialchars($id);
 ?>
 <div style="margin-left: 10px">
+    <form action="items.php">
+        <input type="submit" value="Back to the items">
+    </form>
     <div style="float: left; margin-right: 10px; width: 256px;">
         <h3><?php echo htmlspecialchars($name) ?></h3>
-        <p><b>ID:</b> <?php echo htmlspecialchars($id) ?></p>
+        <p><b>ID:</b> <?php echo $safe_id ?></p>
         <?php
         if ($description) {
             ?>
@@ -37,8 +41,14 @@ if ($description && substr($description, -1) != ".") {
         }
         ?>
         <p><b>Price:</b> <?php echo htmlspecialchars(number_format($price, 2)) ?></p>
-        <form action="items.php">
-            <input type="submit" value="Back to the items">
+        <form action="edit.php" style="display: inline;">
+            <input type="hidden" name="id" value="<?php echo $safe_id ?>" />
+            <input type="submit" value="Edit"/>
+        </form>
+        <form action="update.php" method="post" style="display: inline;">
+            <input type="hidden" name="id" value="<?php echo $safe_id ?>" />
+            <input type="hidden" name="action" value="delete" />
+            <input type="submit" value="Delete" onclick="return confirm('Are you sure?')" />
         </form>
     </div>
     <?php if ($image_name) {

@@ -206,7 +206,7 @@ if ($items) { ?>
         <table border="1px" style="width: 100%;">
             <tr>
                 <th align="center">ID</th>
-                <th align="center">Picture</th>
+                <th align="center">Image</th>
                 <th align="center">Name</th>
                 <th align="center">Price</th>
                 <th align="center">Description</th>
@@ -222,7 +222,7 @@ if ($items) { ?>
                             $image = htmlspecialchars($row['image']);
                             echo "<img src='http://$_SERVER[HTTP_HOST]/images/t_$image' style='max-width: 100%; max-height: 100%; display: block;' >";
                         } else {
-                            echo 'No picture';
+                            echo 'No image';
                         }?>
                     </td>
                     <td align="center"><?php echo htmlspecialchars($row['name']) ?></td>

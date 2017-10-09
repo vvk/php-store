@@ -36,7 +36,7 @@ function validate_query(&$query, &$mysqli = null) {
         if (!empty($mysqli)) {
             $msg .= $mysqli->error;
         }
-        error_log($msg);
+        error_log($msg.'. '.debug_backtrace());
         return FALSE;
     }
 
@@ -262,6 +262,94 @@ function create_item($name, $price, $description = null, $image = null) {
     return $id;
 }
 
+function upload_image(&$generated_name_output) {
+    if (empty($_FILES['image']) || !$_FILES['image']['size']) {
+        return true;
+    }
+
+    $image = $_FILES['image'];
+    $extension = pathinfo(basename($image['name']),PATHINFO_EXTENSION);
+
+    $generated_image_name = uniqid().".$extension";
+    $images_directory = getcwd().'/images';
+
+    if (!file_exists($images_directory)) {
+        mkdir($images_directory, 0777, true);
+    }
+
+    $destination = "$images_directory/$generated_image_name";
+
+    if (!move_uploaded_file($image['tmp_name'], $destination)) {
+        error_log(__FILE__.':'.__FUNCTION__.': Something went wrong while the item image was being uploaded.');
+    }
+
+    $imagick = new Imagick($destination);
+    $imagick->thumbnailImage(64, 64, true);
+    if (!$imagick->writeImage("$images_directory/t_$generated_image_name")) {
+        error_log(__FILE__.':'.__FUNCTION__.': Could not save image.');
+        return false;
+    }
+
+    $generated_name_output = $generated_image_name;
+
+    return true;
+}
+
+function update_item($id, $updates) {
+    $mysqli = get_client();
+    $lambda = function ($key) {
+        return "$key = ?";
+    };
+    $keys = implode(',', array_map($lambda, array_keys($updates)));
+    $stmt = $mysqli->prepare("UPDATE items SET $keys WHERE id = ?");
+
+    if (!validate_query($stmt, $mysqli)) {
+        return false;
+    }
+
+    $types = "";
+    $values = array();
+    foreach ($updates as $key => $value) {
+        $types .= ($key == 'price' ? 'd' : 's');
+        $values[] = $value;
+    }
+    $types .= 'i';
+    $values[] = $id;
+    $stmt->bind_param($types, ...$values);
+
+    if (!$stmt->execute()) {
+        error_log("Could not update item ID:$id: ".$mysqli->error);
+        return false;
+    }
+
+    if (!invalidate_cache($id)) {
+        error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
+        return false;
+    }
+
+    return true;
+}
+
+function delete_item($id) {
+    $mysqli = get_client();
+    $stmt = $mysqli->prepare('DELETE FROM items WHERE id = ?');
+    if (!validate_query($stmt, $mysqli)) {
+        return false;
+    }
+
+    $stmt->bind_param('i', $id);
+    if (!$stmt->execute()) {
+        error_log("Could not delete item ID:$id: ".$mysqli->error);
+        return false;
+    }
+
+    if (!invalidate_cache($id)) {
+        error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
+        return false;
+    }
+
+    return true;
+}
 function get_items_ids_sorted($limit, $offset = 0, $sort_by = 'id', $sort_dir = 'asc') {
     $total = get_total_items();
 
@@ -327,7 +415,6 @@ function get_group($group_key) {
     $group = get_from_cache($group_key);
 
     if ($group) {
-        error_log("Cache hit! $group_key");
         return $group;
     }
 

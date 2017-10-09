@@ -24,6 +24,19 @@ function increment_cache_value($key) {
     return $memcached->increment($key);
 }
 
+function decrement_cache_value($key) {
+    global $memcached;
+    return $memcached->decrement($key);
+}
+
+function increment_total_items() {
+    return increment_cache_value('total_items');
+}
+
+function decrement_total_items() {
+    return decrement_cache_value('total_items');
+}
+
 function get_sorted_ids($sort_by = 'id', $sort_dir = 'asc') {
     global $memcached;
     return $memcached->get("sorted:$sort_by:$sort_dir");
