@@ -36,12 +36,13 @@ if ($description && substr($description, -1) != ".") {
             <?php
         }
         ?>
-        <p><b>Price:</b> <?php echo htmlspecialchars($price) ?></p>
+        <p><b>Price:</b> <?php echo htmlspecialchars(number_format($price, 2)) ?></p>
         <form action="items.php">
             <input type="submit" value="Back to the items">
         </form>
     </div>
-    <?php if ($image_name) {?>
+    <?php if ($image_name) {
+        $image_name = htmlspecialchars($image_name)?>
         <div style="width: 50%; height: 50%; float: left">
             <img src="<?php echo "http://$_SERVER[HTTP_HOST]/images/$image_name"?>" style="max-height: 100%; max-width: 100%">
         </div>

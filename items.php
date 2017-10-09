@@ -220,14 +220,15 @@ if ($items) { ?>
                     <td align="center"><?php echo $id_link ?></td>
                     <td align="center">
                         <?php if (!empty($row['image'])) {
-                            echo "<img src='http://$_SERVER[HTTP_HOST]/images/t_$row[image]' style='max-width: 100%; max-height: 100%; display: block;' >";
+                            $image = htmlspecialchars($row['image']);
+                            echo "<img src='http://$_SERVER[HTTP_HOST]/images/t_$image' style='max-width: 100%; max-height: 100%; display: block;' >";
                         } else {
                             echo 'No picture';
                         }?>
                     </td>
-                    <td align="center"><?php echo $row['name'] ?></td>
-                    <td align="right"><?php echo $row['price'] ?></td>
-                    <td align="center"><?php echo $row['description'] ?></td>
+                    <td align="center"><?php echo htmlspecialchars($row['name']) ?></td>
+                    <td align="right"><?php echo htmlspecialchars(number_format($row['price'], 2)) ?></td>
+                    <td align="center"><?php echo htmlspecialchars($row['description']) ?></td>
                 </tr>
             <?php } ?>
         </table>
