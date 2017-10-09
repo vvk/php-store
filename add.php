@@ -60,4 +60,5 @@ if (!$id) {
     die("Could not create item.");
 }
 
+bump_pages_groups_version();
 header("Location: item.php?id=$id");

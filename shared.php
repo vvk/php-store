@@ -7,6 +7,8 @@ const MYSQL_USER = 'root';
 const MYSQL_PASSWORD = 'root'; // Yeah, it's plain text.
 const DATABASE = 'store';
 
+const GROUP_SIZE = 1000;
+
 function &get_client() {
     $mysqli = new mysqli(
         MYSQL_HOST,
@@ -28,9 +30,13 @@ function _free_resources(&$stmt, &$mysqli) {
     }
 }
 
-function validate_query(&$query) {
+function validate_query(&$query, &$mysqli = null) {
     if (!$query) {
-        error_log('Failed to create MySQLi query.');
+        $msg = 'Failed to create MySQLi query.';
+        if (!empty($mysqli)) {
+            $msg .= $mysqli->error;
+        }
+        error_log($msg);
         return FALSE;
     }
 
@@ -254,4 +260,103 @@ function create_item($name, $price, $description = null, $image = null) {
     put_item_to_cache($id, $item);
 
     return $id;
+}
+
+function get_items_ids_sorted($limit, $offset = 0, $sort_by = 'id', $sort_dir = 'asc') {
+    $total = get_total_items();
+
+    if ($total == 0) {
+        return array();
+    }
+
+    // Normalize offset.
+    $offset = max(0, $offset);
+    $last_index = $offset + $limit;
+
+    // Group where first required id is.
+    $start_group_index = intdiv($offset, GROUP_SIZE);
+    $end_group_index = intdiv($last_index, GROUP_SIZE);
+
+    $groups = array();
+    $pages_version = get_page_groups_version();
+
+    for ($i = $start_group_index; $i <= $end_group_index; ++$i) {
+        $group_key = build_group_key($i, $pages_version, $sort_by, $sort_dir);
+        $next_group = get_group($group_key);
+
+        foreach ($next_group as $id) {
+            $groups[] = $id;
+        }
+    }
+
+    $offset_inside_group = $offset % GROUP_SIZE;
+
+    return array_slice($groups, $offset_inside_group, $limit);
+}
+
+function fill_group($group_key) {
+    break_group_key($group_key, $group_index, $version, $sort_by, $sort_dir);
+    $offset = $group_index * GROUP_SIZE;
+
+    $mysqli = get_client();
+    $query = "SELECT id FROM items ORDER BY $sort_by $sort_dir LIMIT ".GROUP_SIZE." OFFSET ?";
+    $stmt = $mysqli->prepare($query);
+    if (!validate_query($stmt, $mysqli)) {
+        return false;
+    }
+    $stmt->bind_param('i', $offset);
+    if (!$stmt->execute()) {
+        error_log("Failed to fill group $group_key: ".$mysqli->error);
+    }
+
+    $result = $stmt->get_result();
+    $group = array();
+    while ($row = $result->fetch_row()) {
+        $group[] = $row[0];
+    }
+    _free_resources($stmt, $mysqli);
+
+    if (!put_to_cache($group_key, $group)) {
+        return false;
+    }
+
+    return $group;
+}
+
+function get_group($group_key) {
+    $group = get_from_cache($group_key);
+
+    if ($group) {
+        error_log("Cache hit! $group_key");
+        return $group;
+    }
+
+    $group = fill_group($group_key);
+
+    if (!$group) {
+        error_log("Could not fill group $group_key.");
+        return false;
+    }
+
+    return $group;
+}
+
+function build_group_key($index, $version = 0, $sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
+    return "g:$version:$sort_by:$sort_dir:$index";
+}
+
+function break_group_key($group_key, &$index, &$version, &$sort_by, &$sort_dir) {
+    $details = explode(':', $group_key);
+
+    if (count($details) != 5) {
+        error_log('count '.count($details).' while key: '.$group_key.' details: '.print_r($details, true));
+        return false;
+    }
+
+    $version = $details[1];
+    $sort_by = $details[2];
+    $sort_dir = $details[3];
+    $index = $details[4];
+
+    return true;
 }
