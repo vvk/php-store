@@ -18,7 +18,7 @@ if (!$item) {
 $name = $item['name'];
 $price = $item['price'];
 $description = array_key_exists('description', $item) ? $item['description'] : null;
-$image_name = array_key_exists('image_url', $item) ? $item['image_url'] : null;
+$image_name = array_key_exists('image', $item) ? $item['image'] : null;
 
 if ($description && substr($description, -1) != ".") {
     $description .= '.';

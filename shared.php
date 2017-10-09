@@ -232,7 +232,7 @@ function create_item($name, $price, $description = null, $image = null) {
     }
 
     $mysqli = get_client();
-    $stmt = $mysqli->prepare('INSERT INTO items(name, description, price, image_url) VALUES (?, ?, ?, ?)');
+    $stmt = $mysqli->prepare('INSERT INTO items(name, description, price, image) VALUES (?, ?, ?, ?)');
 
     if (!validate_query($stmt)) {
         return false;
@@ -250,7 +250,7 @@ function create_item($name, $price, $description = null, $image = null) {
         'name' => $name,
         'price' => $price,
         'description' => $description,
-        'image_url' => $image);
+        'image' => $image);
     put_item_to_cache($id, $item);
 
     return $id;
