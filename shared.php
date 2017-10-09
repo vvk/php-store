@@ -262,6 +262,84 @@ function create_item($name, $price, $description = null, $image = null) {
     return $id;
 }
 
+function upload_picture(&$generated_name) {
+    if (!$_FILES['picture']['size']) {
+        return true;
+    }
+
+    $pic = $_FILES['picture'];
+    $extension = pathinfo(basename($pic['name']),PATHINFO_EXTENSION);
+
+    $generated_image_name = uniqid().".$extension";
+    $images_directory = getcwd().'/images';
+
+    if (!file_exists($images_directory)) {
+        mkdir($images_directory, 0777, true);
+    }
+
+    $destination = "$images_directory/$generated_image_name";
+
+    if (!move_uploaded_file($pic['tmp_name'], $destination)) {
+        error_log(__FILE__.':'.__FUNCTION__.': Something went wrong while the item picture was being uploaded.');
+    }
+
+    $imagick = new Imagick($destination);
+    $imagick->thumbnailImage(64, 64, true);
+    if (!$imagick->writeImage("$images_directory/t_$generated_image_name")) {
+        error_log(__FILE__.':'.__FUNCTION__.': Could not save image.');
+        return false;
+    }
+
+    $generated_name = $generated_image_name;
+
+    return true;
+}
+
+function update_item($id, $updates) {
+    $mysqli = get_client();
+    $lambda = function ($key) {
+        return "$key = ?";
+    };
+    $keys = implode(',', array_map($lambda, array_keys($updates)));
+    $stmt = $mysqli->prepare("UPDATE items SET $keys WHERE id = ?");
+
+    if (!validate_query($stmt, $mysqli)) {
+        return false;
+    }
+
+    foreach ($updates as $key => $value) {
+        $type = $key == 'price' ? 'd' : 's';
+        $stmt->bind_param($type, $value);
+    }
+
+    if (!$stmt->execute()) {
+        error_log("Could not update item ID:$id: ".$mysqli->error);
+        return false;
+    }
+
+    return true;
+}
+
+function delete_item($id) {
+    $mysqli = get_client();
+    $stmt = $mysqli->prepare('DELETE FROM items WHERE id = ?');
+    if (!validate_query($stmt, $mysqli)) {
+        return false;
+    }
+
+    $stmt->bind_param('i', $id);
+    if (!$stmt->execute()) {
+        error_log("Could not delete item ID:$id: ".$mysqli->error);
+        return false;
+    }
+
+    if (!invalidate_cache($id)) {
+        error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
+        return false;
+    }
+
+    return true;
+}
 function get_items_ids_sorted($limit, $offset = 0, $sort_by = 'id', $sort_dir = 'asc') {
     $total = get_total_items();
 
