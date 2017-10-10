@@ -4,7 +4,7 @@
         <p>Name: <input type="text" name="name" required="required" /></p>
         <p>Description: <br /> <textarea name="description" cols="35" rows="5"></textarea></p>
         <p>Image: <input type="file" name="image" accept="image/jpeg,image/png,image/gif"/></p>
-        <p>Price: <input type="number" step="any" name="price" required="required" /></p>
+        <p>Price: <input type="number" step="any" name="price" max="9999999999.99" min="0.01" required="required" /></p>
         <input type="submit" value="Add item"/>
     </form>
 </div>
