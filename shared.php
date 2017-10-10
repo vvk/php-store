@@ -337,8 +337,8 @@ function get_items_ids_sorted($limit, $offset = 0, $sort_by = DEFAULT_SORTING_FI
     $last_index = $offset + $limit;
 
     // Group where first required id is.
-    $start_group_index = intdiv($offset, GROUP_SIZE);
-    $end_group_index = intdiv($last_index, GROUP_SIZE);
+    $start_group_index = floor($offset / GROUP_SIZE);
+    $end_group_index = floor($last_index / GROUP_SIZE);
 
     $groups = array();
     $pages_version = get_page_groups_version();

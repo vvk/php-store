@@ -147,7 +147,7 @@ resolve_sorting($sort_by, $sort_dir);
 resolve_pagination($page, $items_per_page);
 
 $total_items = get_total_items();
-$total_pages = intdiv($total_items, $items_per_page); // Here we stay 0-based to calculate start item index correctly.
+$total_pages = floor($total_items / $items_per_page); // Here we stay 0-based to calculate start item index correctly.
 
 if ($page > $total_pages) {
     $page = DEFAULT_PAGE_INDEX;
