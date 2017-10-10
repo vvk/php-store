@@ -55,7 +55,7 @@ if (!$item) {
             <tr><td class="name">Name</td><td class="value"><input type="text" name="name" required = "true"value="<?php echo $safe_name ?>"></td></tr>
             <tr><td class="name">Description</td><td class="value"><input width="400" type="text" name="description" value="<?php echo $safe_description ?>"></td></tr>
             <tr><td class="name">Price</td><td class="value"><input type="number" name="price" step="any" max="9999999999.99" min="0.01" required = "true" value="<?php echo $safe_price ?>"></td></tr>
-            <tr><td class="name">Image</td><td class="value"><input type="file" name="image" accept="image/jpeg,image/png,image/gif"/></td></tr>
+            <tr><td class="name">Image (max. size is 2 MB)</td><td class="value"><input type="file" name="image" accept="image/jpeg,image/png,image/gif"/></td></tr>
         </table>
         <input type="hidden" name="id" value="<?php echo $safe_id ?>" />
         <input type="hidden" name="action" value="update" />

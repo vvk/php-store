@@ -26,8 +26,16 @@ function update($id) {
         $updated_parameters['description'] = $description;
     }
 
-    if (upload_image($image) && !empty($image)) {
-        $updated_parameters['image'] = $image;
+    if (is_uploaded_file($_FILES['image']['tmp_name'])) {
+        if (upload_image($image)) {
+            $updated_parameters['image'] = $image;
+        } else {
+            die('Could not load image for the item.');
+        }
+    }
+
+    if (empty($updated_parameters)) {
+        return true;
     }
 
     if (!update_item($id, $updated_parameters)) {

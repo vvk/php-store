@@ -31,7 +31,7 @@ function validate_query(&$query, &$mysqli = null) {
         if (!empty($mysqli)) {
             $msg .= $mysqli->error;
         }
-        error_log($msg.'. '.debug_backtrace());
+        error_log($msg);
         return FALSE;
     }
 
@@ -234,18 +234,27 @@ function create_item($name, $price, $description = null, $image = null) {
 }
 
 function upload_image(&$generated_name_output) {
-    if (empty($_FILES['image']) || !$_FILES['image']['size']) {
-        return true;
+    $image = $_FILES['image'];
+
+    if (!$image) {
+        return false;
     }
 
-    $image = $_FILES['image'];
+    if ($image['size'] > 2 * 1024 * 1024) {
+        error_log("Image size is too big: $image[size].");
+        return false;
+    }
+
     $extension = pathinfo(basename($image['name']),PATHINFO_EXTENSION);
 
     $generated_image_name = uniqid().".$extension";
     $images_directory = getcwd().'/images';
 
     if (!file_exists($images_directory)) {
-        mkdir($images_directory, 0777, true);
+        if (!mkdir($images_directory, 0777, true)) {
+            error_log("Could not create directory for images");
+            return false;
+        }
     }
 
     $destination = "$images_directory/$generated_image_name";

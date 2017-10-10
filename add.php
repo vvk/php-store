@@ -17,8 +17,11 @@ if ($price <= 0) {
     // But can be zero, we're generous.
 }
 
-if (!upload_image($generated_image_name)) {
-    error_log('Could not load image for the item.');
+$generated_image_name = null;
+if (is_uploaded_file($_FILES['image']['tmp_name'])) {
+    if (!upload_image($generated_image_name)) {
+        die('Could not load image for the item.');
+    }
 }
 
 $id = create_item($name, $price, $description, $generated_image_name);
