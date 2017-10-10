@@ -19,6 +19,8 @@ function update($id) {
     $price = $_POST['price'];
     if ($price > 0 && $price != $item['price']) {
         $updated_parameters['price'] = $price;
+        // We must reset pages cache here, since sorting by price is allowed.
+        $reset_pages_cache = true;
     }
 
     $description = $_POST['description'];
@@ -43,7 +45,9 @@ function update($id) {
         return false;
     }
 
-    bump_pages_groups_version();
+    if (isset($reset_pages_cache)) {
+        bump_pages_groups_version();
+    }
 
     return true;
 }
