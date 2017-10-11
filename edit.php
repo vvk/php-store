@@ -103,7 +103,7 @@ $safe_price = htmlspecialchars($item['price']);
                         <td class="value">
                             <input type="file"
                                    name="image"
-                                   accept="image/jpeg,image/png,image/gif"/>
+                                   accept="image/jpeg,image/png"/>
                         </td>
                     </tr>
                 </table>
