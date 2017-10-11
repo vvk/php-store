@@ -1,10 +1,24 @@
 <div style="float: left; width: auto; margin-left: 10px; margin-right: 10px">
     <h3>Add new item</h3>
     <form action="add.php" method="post" enctype="multipart/form-data">
-        <p>Name: <input type="text" name="name" placeholder="Maximum is 200 symbols." maxlength="200" required="required" /></p>
-        <p>Description: <br /> <textarea name="description" cols="35" rows="5" placeholder="Maximum is 1000 symbols." maxlength="1000"></textarea></p>
-        <p>Image (max. size is 2 MB): <input type="file" name="image" accept="image/jpeg,image/png,image/gif"/></p>
-        <p>Price: <input type="number" min="0.01" max="1000000000" step="any"  required="required" /></p>
+        <p>Name: <input type="text" name="name" placeholder="Maximum is 200 symbols." maxlength="200"
+                        required="required"/></p>
+        <p>Description: <br/>
+            <textarea name="description"
+                      cols="35" rows="5"
+                      placeholder="Maximum is 1000 symbols."
+                      maxlength="1000"></textarea>
+        </p>
+        <p>Image (max. size is 2 MB): <input type="file"
+                                             name="image"
+                                             accept="image/jpeg,image/png,image/gif"/>
+        </p>
+        <p>Price: <input type="number"
+                         min="0.01"
+                         max="1000000000"
+                         step="any"
+                         required="required"/>
+        </p>
         <input type="submit" value="Add item"/>
     </form>
 </div>

@@ -226,9 +226,15 @@ if ($items) { ?>
                             echo 'No image';
                         }?>
                     </td>
-                    <td align="center"><?php echo htmlspecialchars($row['name']) ?></td>
-                    <td align="right"><?php echo htmlspecialchars(number_format($row['price'], 2)) ?></td>
-                    <td align="center"><?php echo htmlspecialchars($row['description']) ?></td>
+                    <td align="center">
+                        <?php echo htmlspecialchars($row['name']) ?>
+                    </td>
+                    <td align="right">
+                        <?php echo htmlspecialchars(number_format($row['price'], 2)) ?>
+                    </td>
+                    <td align="center">
+                        <?php echo htmlspecialchars($row['description']) ?>
+                    </td>
                 </tr>
             <?php } ?>
         </table>

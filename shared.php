@@ -245,10 +245,10 @@ function upload_image(&$generated_name_output) {
         return false;
     }
 
-    $extension = pathinfo(basename($image['name']),PATHINFO_EXTENSION);
+    $extension = pathinfo(basename($image['name']), PATHINFO_EXTENSION);
 
-    $generated_image_name = uniqid().".$extension";
-    $images_directory = getcwd().'/images';
+    $generated_image_name = uniqid() . ".$extension";
+    $images_directory = getcwd() . '/images';
 
     if (!file_exists($images_directory)) {
         if (!mkdir($images_directory, 0777, true)) {
@@ -300,13 +300,13 @@ function update_item($id, $updates) {
     $stmt->bind_param($types, ...$values);
 
     if (!$stmt->execute()) {
-        error_log("Could not update item ID:$id: ".$mysqli->error);
+        error_log("Could not update item ID:$id: " . $mysqli->error);
         return false;
     }
     _free_resources($stmt, $mysqli);
 
     if (!invalidate_cache($id)) {
-        error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
+        error_log("Could not delete item ID:$id from cache: " . get_cache()->getResultMessage());
         return false;
     }
 
@@ -322,18 +322,19 @@ function delete_item($id) {
 
     $stmt->bind_param('i', $id);
     if (!$stmt->execute()) {
-        error_log("Could not delete item ID:$id: ".$mysqli->error);
+        error_log("Could not delete item ID:$id: " . $mysqli->error);
         return false;
     }
     _free_resources($stmt, $mysqli);
 
     if (!invalidate_cache($id)) {
-        error_log("Could not delete item ID:$id from cache: ".get_cache()->getResultMessage());
+        error_log("Could not delete item ID:$id from cache: " . get_cache()->getResultMessage());
         return false;
     }
 
     return true;
 }
+
 function get_items_ids_sorted($limit, $offset = 0, $sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
     $total = get_total_items();
 
@@ -371,14 +372,14 @@ function fill_group($group_key) {
     $offset = $group_index * GROUP_SIZE;
 
     $mysqli = get_client();
-    $query = "SELECT id FROM items ORDER BY $sort_by $sort_dir LIMIT ".GROUP_SIZE." OFFSET ?";
+    $query = "SELECT id FROM items ORDER BY $sort_by $sort_dir LIMIT " . GROUP_SIZE . " OFFSET ?";
     $stmt = $mysqli->prepare($query);
     if (!validate_query($stmt, $mysqli)) {
         return false;
     }
     $stmt->bind_param('i', $offset);
     if (!$stmt->execute()) {
-        error_log("Failed to fill group $group_key: ".$mysqli->error);
+        error_log("Failed to fill group $group_key: " . $mysqli->error);
     }
 
     $result = $stmt->get_result();
@@ -420,7 +421,7 @@ function break_group_key($group_key, &$index, &$version, &$sort_by, &$sort_dir) 
     $details = explode(':', $group_key);
 
     if (count($details) != 5) {
-        error_log('count '.count($details).' while key: '.$group_key.' details: '.print_r($details, true));
+        error_log('count ' . count($details) . ' while key: ' . $group_key . ' details: ' . print_r($details, true));
         return false;
     }
 

@@ -103,8 +103,7 @@ $action = strtolower($action);
 
 if ($action == 'update') {
     if (update($id)) {
-
-        header('Location: item.php?id='.htmlspecialchars($id));
+        header('Location: item.php?id=' . htmlspecialchars($id));
     } else {
         die("Failed to update item ID:$id.");
     }
