@@ -26,6 +26,11 @@ if ($description && substr($description, -1) != ".") {
 
 $safe_id = htmlspecialchars($id);
 ?>
+<html>
+    <head>
+        <title>Item: <?php echo $name ?></title>
+    </head>
+    <body>
 <div style="margin-left: 10px">
     <form action="items.php">
         <input type="submit" value="Back to the items">
@@ -58,3 +63,5 @@ $safe_id = htmlspecialchars($id);
         </div>
     <?php }?>
 </div>
+    </body>
+</html>

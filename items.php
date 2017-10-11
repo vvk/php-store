@@ -1,3 +1,8 @@
+<html>
+    <head>
+        <title>PHP Store Items</title>
+    </head>
+<body>
 <?php
 error_reporting(E_ALL);
 
@@ -235,3 +240,5 @@ if ($items) { ?>
         </div>
     </div>
 <?php } ?>
+    </body>
+</html>

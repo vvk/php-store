@@ -15,7 +15,15 @@ if (!$item) {
     return;
 }
 
+$safe_id = htmlspecialchars($item['id']);
+$safe_name = htmlspecialchars($item['name']);
+$safe_description = htmlspecialchars($item['description']);
+$safe_price = htmlspecialchars($item['price']);
+
 ?>
+<html>
+<head>
+    <title>Editing <?php echo $safe_name ?></title>
 <style>
     table {
         width: 100%;
@@ -42,12 +50,11 @@ if (!$item) {
         margin: 5px;
     }
 </style>
+
+</head>
+<body>
 <div class="item">
     <?php
-    $safe_id = htmlspecialchars($item['id']);
-    $safe_name = htmlspecialchars($item['name']);
-    $safe_description = htmlspecialchars($item['description']);
-    $safe_price = htmlspecialchars($item['price']);
     echo "<h3>Edit: <a href='item.php?id=$safe_id'>$safe_name</a></h3>"?>
     <form action="update.php" method="post" enctype="multipart/form-data">
         <table border="1px">
@@ -66,3 +73,5 @@ if (!$item) {
         <input type="submit" value="Cancel"/>
     </form>
 </div>
+</body>
+</html>
