@@ -12,12 +12,26 @@ function update($id) {
     }
 
     $name = $_POST['name'];
-    if (!empty($name) && $name != $item['name']) {
+
+    if (empty($name)) {
+        die("Item name can not be empty.");
+    }
+
+    if (strlen($name) > 200) {
+        die("Maximum name length is 200 symbols.");
+    }
+
+    if ($name != $item['name']) {
         $updated_parameters['name'] = $name;
     }
 
     $price = $_POST['price'];
-    if ($price > 0 && $price != $item['price']) {
+
+    if ($price <= 0 || $price > (1000 * 1000 * 1000)) {
+        die("Price must be positive decimal number between 0 and 1000000000 (one billion).");
+    }
+
+    if ($price != $item['price']) {
         $updated_parameters['price'] = $price;
         // We must reset pages cache here, since sorting by price is allowed.
         $reset_pages_cache = true;
@@ -28,7 +42,15 @@ function update($id) {
         $updated_parameters['description'] = $description;
     }
 
+    if (strlen($description) > 1000) {
+        die("Maximum description length is 1000.");
+    }
+
     if (is_uploaded_file($_FILES['image']['tmp_name'])) {
+        if ($_FILES['image']['size'] > 1024 * 1024 * 2) {
+            die("Image size is too large. Maximum size is 2 MB.");
+        }
+
         if (upload_image($image)) {
             $updated_parameters['image'] = $image;
         } else {

@@ -12,13 +12,24 @@ if (empty($name)) {
     die("Item name can not be empty.");
 }
 
-if ($price <= 0) {
-    die("Price must be positive decimal number.");
-    // But can be zero, we're generous.
+if (strlen($name) > 200) {
+    die("Maximum name length is 200 symbols.");
+}
+
+if (strlen($description) > 1000) {
+    die("Maximum description length is 1000.");
+}
+
+if ($price <= 0 || $price > (1000 * 1000 * 1000)) {
+    die("Price must be positive decimal number between 0 and 1000000000 (one billion).");
 }
 
 $generated_image_name = null;
 if (is_uploaded_file($_FILES['image']['tmp_name'])) {
+    if ($_FILES['image']['size'] > 1024 * 1024 * 2) {
+        die("Image size is too large. Maximum size is 2 MB.");
+    }
+
     if (!upload_image($generated_image_name)) {
         die('Could not load image for the item.');
     }

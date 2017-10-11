@@ -52,9 +52,9 @@ if (!$item) {
     <form action="update.php" method="post" enctype="multipart/form-data">
         <table border="1px">
             <tr><th>Parameter</th><th>Value</th></tr>
-            <tr><td class="name">Name</td><td class="value"><input type="text" name="name" required = "true"value="<?php echo $safe_name ?>"></td></tr>
-            <tr><td class="name">Description</td><td class="value"><input width="400" type="text" name="description" value="<?php echo $safe_description ?>"></td></tr>
-            <tr><td class="name">Price</td><td class="value"><input type="number" name="price" step="any" max="9999999999.99" min="0.01" required = "true" value="<?php echo $safe_price ?>"></td></tr>
+            <tr><td class="name">Name</td><td class="value"><input type="text" name="name" placeholder="Maximum is 200 symbols." maxlength="200" required = "true"value="<?php echo $safe_name ?>"></td></tr>
+            <tr><td class="name">Description</td><td class="value"><textarea name="description" cols="35" rows="5" placeholder="Maximum is 1000 symbols." maxlength="1000"><?php echo $safe_description ?></textarea></td></tr>
+            <tr><td class="name">Price</td><td class="value"><input type="number" name="price" min="0.01" max="1000000000" step="any" required = "true" value="<?php echo $safe_price ?>"></td></tr>
             <tr><td class="name">Image (max. size is 2 MB)</td><td class="value"><input type="file" name="image" accept="image/jpeg,image/png,image/gif"/></td></tr>
         </table>
         <input type="hidden" name="id" value="<?php echo $safe_id ?>" />
