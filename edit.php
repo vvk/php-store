@@ -81,9 +81,7 @@ $safe_price = htmlspecialchars($item['price']);
                                         cols="35"
                                         rows="5"
                                         placeholder="Maximum is 1000 symbols."
-                                        maxlength="1000">
-                                <?php echo $safe_description ?>
-                            </textarea>
+                                        maxlength="1000"><?php echo $safe_description ?></textarea>
                         </td>
                     </tr>
                     <tr>
