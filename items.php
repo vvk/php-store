@@ -3,6 +3,7 @@
         <title>PHP Store Items</title>
     </head>
 <body>
+<h2 style="margin-left: 10px; margin-top: 10px"><a href="items.php">PHP Store</a></h2>
 <?php
 error_reporting(E_ALL);
 
