@@ -28,7 +28,7 @@ while ($limit > 0) {
     $mysqli->begin_transaction();
     for ($i = 0; $i < $batch_size; ++$i) {
         $name = 'Item '.uniqid('id:');
-        $description = $paragraphs[rand(0, $total_paragraphs - 1)];
+        $description = $paragraphs[rand(0, $total_paragraphs - 1)] . PHP_EOL . date(DATE_RFC822);
         $price = time();
 
         $stmt->bind_param('ssd', $name, $description, $price);
