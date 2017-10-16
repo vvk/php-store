@@ -20,8 +20,8 @@ if (strlen($description) > 1000) {
     die("Maximum description length is 1000.");
 }
 
-if ($price <= 0 || $price > (1000 * 1000 * 1000)) {
-    die("Price must be positive decimal number between 0 and 1000000000 (one billion).");
+if ($price <= 0 || $price > 2147483647) {
+    die("Price must be positive decimal number between 0 and 2147483647, but was " . htmlspecialchars($price));
 }
 
 $generated_image_name = null;

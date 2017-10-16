@@ -18,7 +18,7 @@ if (!$item) {
 $safe_id = htmlentities($item['id']);
 $safe_name = htmlentities($item['name']);
 $safe_description = nl2br(htmlentities($item['description']));
-$safe_price = htmlentities(number_format($item['price'], 2));
+$safe_price = htmlentities(number_format($item['price'], 2, '.', ''));
 
 ?>
 <html>
@@ -90,7 +90,7 @@ $safe_price = htmlentities(number_format($item['price'], 2));
                             <input type="number"
                                    name="price"
                                    min="0.01"
-                                   max="1000000000"
+                                   max="2147483647"
                                    step="any"
                                    required="true"
                                    value="<?php echo $safe_price ?>">
