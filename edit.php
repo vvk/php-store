@@ -17,7 +17,7 @@ if (!$item) {
 
 $safe_id = htmlentities($item['id']);
 $safe_name = htmlentities($item['name']);
-$safe_description = nl2br(htmlentities($item['description']));
+$safe_description = htmlentities($item['description']);
 $safe_price = htmlentities(number_format($item['price'], 2, '.', ''));
 
 ?>
