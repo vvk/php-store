@@ -1,8 +1,9 @@
 <?php
 
 include_once 'constants.php';
-
 include 'cache.php';
+
+error_reporting(E_ALL);
 
 function &get_client() {
     $mysqli = new mysqli(
@@ -344,7 +345,7 @@ function get_items_ids_sorted($limit, $offset = 0, $sort_by = DEFAULT_SORTING_FI
 
     // Normalize offset.
     $offset = max(0, $offset);
-    $last_index = $offset + $limit;
+    $last_index = min($offset + $limit, get_total_items());
 
     // Group where first required id is.
     $start_group_index = floor($offset / GROUP_SIZE);
@@ -431,4 +432,57 @@ function break_group_key($group_key, &$index, &$version, &$sort_by, &$sort_dir) 
     $index = $details[4];
 
     return true;
+}
+
+function resolve_sorting(&$sort_by, &$sort_dir)
+{
+    if (!empty($_GET['sort_by'])) {
+        $sort_by = strtolower($_GET['sort_by']);
+    }
+
+    if (!empty($_GET['sort_dir'])) {
+        $sort_dir = strtolower($_GET['sort_dir']);
+    }
+
+    if ($sort_by != 'id' && $sort_by != 'price') {
+        $sort_by = DEFAULT_SORTING_FIELD;
+    }
+
+    if ($sort_dir != 'asc' && $sort_dir != 'desc') {
+        $sort_dir = DEFAULT_SORTING_DIRECTION;
+    }
+}
+
+function resolve_pagination(&$items_per_page, &$page, &$total_pages)
+{
+    if (!empty($_GET['ipp'])) {
+        $items_per_page = (int) $_GET['ipp'];
+        if ($items_per_page < 1) {
+            $items_per_page = DEFAULT_ITEMS_PER_PAGE;
+        }
+    } else {
+        $items_per_page = DEFAULT_ITEMS_PER_PAGE;
+    }
+
+    if (!empty($_GET['page'])) {
+        $page = (int) $_GET['page'];
+        if ($page < 0) {
+            $page = DEFAULT_PAGE_INDEX;
+        }
+    } else {
+        $page = DEFAULT_PAGE_INDEX;
+    }
+
+    $total_items = get_total_items();
+    $total_pages = floor($total_items / $items_per_page); // Here we stay 0-based to calculate start item index correctly.
+
+    if ($page > $total_pages) {
+        $page = DEFAULT_PAGE_INDEX;
+    }
+}
+
+function page_items($page, $items_per_page, $sort_by = DEFAULT_SORTING_FIELD, $sort_dir = DEFAULT_SORTING_DIRECTION) {
+    $from = $page * $items_per_page;
+    $ids = get_items_ids_sorted($items_per_page, $from, $sort_by, $sort_dir);
+    return get_items($ids);
 }
